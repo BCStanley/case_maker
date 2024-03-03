@@ -1,0 +1,47 @@
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+Connection to SQLite DB successful
+\section{Cases Using Certain Key Terms}
+
+These are all of the cases that themselves show citation to (either by counsel or the bench) some continental writer.
+\\ 
+\begin{enumerate}
+\item{\textit{Robinson v Bland} (1760) 2 Bur 1077, 97 ER 717 [Huber, Voet.]}
+\item{\textit{Holman v Johnson} (1775) 1 Cowp 342, 98 ER 1120 [Huber.]}
+\item{\textit{Hunter v Potts} (1791) 4 TR 182, 100 ER 962 [Voet.]}
+\item{\textit{Dalrymple v Dalrymple} (1811) 2 Hag Con 54, 161 ER 665 [Huber, Voet.]}
+\item{\textit{Wolf v Oxholm} (1817) 7 M\&S 92, 105 ER 1177 [Vattel, Grotius, Puffendorf, Bynkerschoek.]}
+\item{\textit{Ruding v Smith} (1821) 2 Hag Con 371, 161 ER 774 [Huber.]}
+\item{\textit{Birthwhistle v Vardill} (1826) 5 B\&C 438, 108 ER 163 [Huber.]}
+\item{\textit{De la Vega v Vianna} (1830) 1 B \& Ad 284, 109 ER 792 [Huber, Voet.]}
+\item{\textit{Scott v Alnutt} (1831) 2 Dow \& Clark 404, 6 ER 778 [Voet, Erskine.]}
+\item{\textit{Trimbey v Vignier} (1834) 1 Bing NC 151, 131 ER 1075 [Huber.]}
+\item{\textit{Huber v Steiner} (1835) 2 Bing NC 202, 132 ER 80 [Huber, Story.]}
+\item{\textit{Don v Lippmann} (1837) 5 Cl\& F 1, 7 ER 303 [Huber, Story, Voet.]}
+\item{\textit{Caldwell v Vanvlissengen} (1851) 9 Hare 415, 68 ER 571 [Huber, Vattel, Story, Boullenois.]}
+\item{\textit{Leroux v Brown} (1852) 12 CB 801, 138 ER 1119 [Huber, Story, Burge.]}
+\item{\textit{The Johannes Christoph} (1854) 2 Sp Ecc \& Ad 93, 164 ER 325 [Huber.]}
+\item{\textit{Brook v Brook} (1858) 3 Sm \& Grif 481, 65 ER 746 [Huber, Story, Voet, Sanchez, Gayll.]}
+\item{\textit{Brook v Brook (no 2)} (1861) 9 HLC 193, 11 ER 703 [Huber, Story.]}
+\item{\textit{MacFarlane v Norris} (1862) 2 B\&S 783, 121 ER 1263 [Huber, Story.]}
+\item{\textit{Simpson v Fogo} (1863) 1 H\&M 195, 71 ER 85 [Huber, Story, Burge.]}
+\end{enumerate}
+

@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 from typing import Optional
 from openpyxl.cell import Cell
+import sqlite3
+from sqlite3 import Error
 
 
 class Case:
@@ -114,3 +116,57 @@ class Case:
             link=get_str_value(row[11]),
             special_terms=get_comma_list(row[12])
         )
+
+
+class Casebook:
+
+    def __init__(
+            self,
+            sql_path: str,
+            cases: list[Case] = [],
+    ):
+        self.cases = cases
+        self.sql_path = sql_path
+        try:
+            self.sql_connection: Optional[sqlite3.Connection] = sqlite3.connect(self.sql_path)
+            print(f"Connection to {self.sql_path} successful")
+        except Error as e:
+            print(f"The error {e} occurred")
+            self.sql_connection = None
+
+    @property
+    def display_casebook_info(self) -> str:
+        """Gives a basic display of the key information about the Casebook object.
+        :return: str, number of cases [number], SQL database [path].
+        """
+        pass
+
+    @staticmethod
+    def new_casebook_from_xl(sql_path: str, xl_path: str) -> Casebook:
+        """ Create a new Casebook with a .db file of the path, sql_path.
+        Enter new data into that casebook (and likewise the .db file) from the xl_path. 
+        :param sql_path: a str object, a path to a blank or non-existent .db file. 
+        :param xl_path: a str object, a path to a .xlsx file containing the relevant data. 
+        :return: a Casebook object, with cases generated from .xlsx file (using Case.from_excel() for each row), and a
+        sql connection object generated from sql_path. 
+        """
+        pass
+
+    @staticmethod
+    def new_casebook_from_sql(sql_path: str) -> Casebook:
+        """ Create a new Casebook with a .db file of the path, sql_path.
+        The data is read from the sql file itself, which already contains the relevant data.
+        :param sql_path: a str object, a path to a .db file containing relevant data.
+        :return: a Casebook object, with cases generated from the .db file and an sql connection object (sql_path).
+        """
+        pass
+
+    def update_casebook_from_xl(self, xl_path):
+        """
+        Updates the Casebook object with data given from a .xlsx file, at xl_path.
+        :param xl_path: a str object, a path to a .xlsx file containing the relevant data.
+        :return: self, the Casebook object is itself updated.
+        """
+        pass
+
+

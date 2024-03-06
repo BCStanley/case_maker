@@ -56,3 +56,18 @@ The class also contains the possibility of a `related_cases` entry. This is not 
 
 ## `Casebook`
 
+
+
+### Collection of `Case` objects mirrors `connection`
+
+A **critically** important feature of the mirroring of the `Case` objects it contains and the data in the `connection` object. 
+
+This means there _can never be_ divergence between the two. 
+
+As such, it has been designed to mean that **you cannot update one without updating the other.** 
+
+## `Table` 
+
+## `DatabaseStructure` 
+
+

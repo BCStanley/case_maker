@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+
+import os.path
 import re
 from typing import Optional
 from openpyxl.cell import Cell
 import sqlite3
 from sqlite3 import Error
+
+from sql_structure import Table
+from sql_structure import DatabaseStructure
 
 
 class Case:
@@ -128,11 +133,22 @@ class Casebook:
         self.cases = cases
         self.sql_path = sql_path
         try:
-            self.sql_connection: Optional[sqlite3.Connection] = sqlite3.connect(self.sql_path)
-            print(f"Connection to {self.sql_path} successful")
+            self.sql_connection: sqlite3.Connection = sqlite3.connect(self.sql_path)
+            print(f"Connection to {self.sql_path} successful.")
         except Error as e:
             print(f"The error {e} occurred")
-            self.sql_connection = None
+            raise ValueError(f"The file {self.sql_path} does not exist, or could not be connected to.")
+        self.database = DatabaseStructure()
+
+    def execute(self, query: str):
+        cursor = self.sql_connection.cursor()
+        try:
+            cursor.execute("PRAGMA foreign_keys = ON")
+            cursor.execute(query)
+            self.sql_connection.commit()
+            print("Query executed successfully")
+        except Error as e:
+            print(f"The error '{e}' occurred")
 
     @property
     def display_casebook_info(self) -> str:
@@ -142,7 +158,25 @@ class Casebook:
         pass
 
     @staticmethod
-    def new_casebook_from_xl(sql_path: str, xl_path: str) -> Casebook:
+    def make_new_database(temp_connection: sqlite3.Connection):
+        """ A static method for producing a new database, which is called as part of the new_casebook_from_xl and
+        new_casebook_from_sql functions.
+        :param temp_connection: this must be a sqlite3.Connection object, which will already have been established.
+        :return: None, but it inserts the relevant information.
+        """
+        all_tables = DatabaseStructure()
+        cursor = temp_connection.cursor()
+        for table in all_tables:
+            try:
+                cursor.execute("PRAGMA foreign_keys = ON")
+                cursor.execute(table.creation_query)
+                temp_connection.commit()
+                print(f"Table {table.title} created successfully")
+            except Error as e:
+                print(f"Failed to create table {table.title}. The error '{e}' occurred")
+
+    @staticmethod
+    def new_casebook_from_xl(sql_path: str, xl_path: str) -> Casebook | None:
         """ Create a new Casebook with a .db file of the path, sql_path.
         Enter new data into that casebook (and likewise the .db file) from the xl_path. 
         :param sql_path: a str object, a path to a blank or non-existent .db file. 
@@ -150,14 +184,39 @@ class Casebook:
         :return: a Casebook object, with cases generated from .xlsx file (using Case.from_excel() for each row), and a
         sql connection object generated from sql_path. 
         """
-        pass
+
+        def read_cases_from_new(xl: str = xl_path) -> list[Case]:
+            """
+            This reads the relevant xl_file, and produces the relevant list[Case] needed to __init__ a new Casebook.
+            :param xl: a str, which is a path to a .xlsx file. The function will only be engaged when that file
+            is known to exist.
+            :return: a list object, containing Case objects.
+            """
+            pass
+
+        if os.path.isfile(sql_path):  # Establish whether there is already a .db file at the sql_path.
+            print(f"The file {sql_path} already exists. Cannot make new database.")  # If so, raise an error.
+            return None  # And return without doing anything.
+        else:  # If there is no .db file, proceed to make one.
+            try:
+                new_sql_connection: sqlite3.Connection = sqlite3.connect(sql_path)
+                print(f"Connection to {sql_path} successful after being made.")
+            except Error as e:  # If there is an error in doing this, then raise the error.
+                print(f"The error {e} occurred")
+                return None  # And return without doing anything.
+        if os.path.isfile(xl_path):  # Establish whether the .xlsx file exists
+            Casebook.make_new_database(new_sql_connection)
+        else:
+            print(f"The file {xl_path} does not exist.")
+            return None
+        print("function finished")
 
     @staticmethod
     def new_casebook_from_sql(sql_path: str) -> Casebook:
         """ Create a new Casebook with a .db file of the path, sql_path.
         The data is read from the sql file itself, which already contains the relevant data.
         :param sql_path: a str object, a path to a .db file containing relevant data.
-        :return: a Casebook object, with cases generated from the .db file and an sql connection object (sql_path).
+        :return: a Casebook object, with cases generated from the .db file and a sql connection object (sql_path).
         """
         pass
 

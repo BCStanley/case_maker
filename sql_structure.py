@@ -29,6 +29,7 @@ class Table:
         :return: An SQL script with line breaks, e.g. "INSERT INTO [table]..."
         """
         forbid: str = "INTEGER PRIMARY KEY AUTOINCREMENT"
+
         try:
             string: str = f"""
             INSERT INTO {self.title} ({", ".join([field for field in self.fields if self.fields[field] != forbid])}) VALUES

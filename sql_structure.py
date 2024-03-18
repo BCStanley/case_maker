@@ -126,3 +126,50 @@ class DatabaseStructure:
                      self.area_crossref_table,
                      self.special_terms_crossref_table])
 
+
+class SelectionQuery:
+
+    def __init__(
+            self,
+            search_table: Table,
+            selections: list[str],
+            conditions: dict,
+            ):
+        self.search_table = search_table
+        self.selections = selections
+        self.conditions = conditions
+
+        for field in self.selections:
+            assert field in self.search_table.fields.keys() or "*", f"The value {field} is not in {self.search_table.title}."
+        for condition in self.conditions:
+            assert condition in self.search_table.fields, f"The value {condition} is not in {self.search_table.title}."
+
+    @property
+    def sql_text(self) -> str:
+
+        def condition_line(key: str, entry: list) -> str:
+            if "TEXT" in self.search_table.fields[key]:
+                value = f"\"{str(entry[1])}\""
+            else:
+                value = entry[1]
+            if entry[0] == "=":
+                return f"{key} {entry[0]} {value}"
+            elif entry[0] == "in":
+                return f"{key} {entry[0]}({value})"
+            elif entry[0] == "between":
+                entries = value.split(", ")
+                return f"{key} {entry[0]} {entries[0]} AND {entries[1]}"
+
+        if self.conditions:
+            string = f"""SELECT {", ".join([item for item in self.selections])} from {self.search_table.title} where 
+            {" AND ".join(condition_line(field, self.conditions[field]) for field in self.conditions)}
+            """
+        else:
+            string = f"""SELECT {", ".join([item for item in self.selections])} from {self.search_table.title}
+            """
+        return string
+
+    @property
+    def full_sql_text(self) -> str:
+        return f"{self.sql_text};"
+

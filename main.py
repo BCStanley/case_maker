@@ -7,11 +7,13 @@ from typing import Optional
 from openpyxl.cell import Cell
 import sqlite3
 from sqlite3 import Error
+from itertools import chain
 
 from openpyxl.reader.excel import load_workbook
 
 from sql_structure import Table
 from sql_structure import DatabaseStructure
+from sql_structure import SelectionQuery
 
 
 class Case:
@@ -48,7 +50,15 @@ class Case:
         self.id = id
 
     def display(self):
-        print(self.display_name)
+        print(f"""---
+        {self.display_name}
+        area_tags: {self.display_area_tags}
+        subject_tags: {self.display_subject_tags}
+        authors: {self.display_author}
+        special_terms: {self.display_special_terms}
+        comment: {self.comment}
+        cited_in: {self.display_cite_ins}
+        """)
 
     @property
     def display_name(self) -> str:
@@ -341,13 +351,75 @@ class Casebook:
             return None
 
     @staticmethod
-    def new_casebook_from_sql(sql_path: str) -> Casebook:
+    def new_casebook_from_sql(sql_path: str) -> Casebook | None:
         """ Create a new Casebook with a .db file of the path, sql_path.
         The data is read from the sql file itself, which already contains the relevant data.
         :param sql_path: a str object, a path to a .db file containing relevant data.
         :return: a Casebook object, with cases generated from the .db file and a sql connection object (sql_path).
         """
-        pass
+
+        def get_data(case_id: int, table: Table, crossref_table:Table) -> list[str]:
+            relevant_database_query = SelectionQuery(
+                table,
+                ["name"],
+                {"id": ["in", SelectionQuery(crossref_table, [list(crossref_table.fields.keys())[0]], {list(crossref_table.fields.keys())[1]: ["=", case_id]}).sql_text]}
+            )
+            cursor.execute(relevant_database_query.full_sql_text)
+            return list(chain.from_iterable(cursor.fetchall()))
+
+        def get_data_with_comments(case_id: int, table: Table, crossref_table: Table) -> dict:
+            first_database_query = SelectionQuery(
+                crossref_table,
+                [list(crossref_table.fields)[0], list(crossref_table.fields)[2]],
+                {list(crossref_table.fields)[1]: ["=", case_id]}
+            )
+            cursor.execute(first_database_query.full_sql_text)
+            return_dict = {}
+            for result in cursor.fetchall():
+                comment = result[1]
+                person_id = result[0]
+                additional_database_query = SelectionQuery(
+                    table,
+                    ["name"],
+                    {"id": ["=", person_id]}
+                )
+                cursor.execute(additional_database_query.full_sql_text)
+                person_name = cursor.fetchone()[0]
+                return_dict[person_name] = comment
+            return return_dict
+
+        if not os.path.isfile(sql_path):  # First check if the file exists.
+            print(f"The database {sql_path} does not exist")
+            return
+        try:
+            connection: sqlite3.Connection = sqlite3.connect(sql_path)
+            print(f"Connection to {sql_path} successful.")
+        except Error as e:
+            print(f"The error {e} occurred")
+        all_tables = DatabaseStructure()
+        cursor = connection.cursor()
+        get_all_cases = SelectionQuery(all_tables.cases_table, ["*"], {})
+        cursor.execute(get_all_cases.full_sql_text)
+        obtained_cases = cursor.fetchall()
+        cases_list = []
+        for case in obtained_cases:
+            new_case = Case(
+                id=case[0],
+                name=case[1],
+                year=case[2],
+                nom_cite=case[3],
+                er_cite=case[4],
+                court=case[5],
+                link=case[6],
+                comment=case[7],
+                area_tags=get_data(case[0], all_tables.area_table, all_tables.area_crossref_table),
+                subject_tags=get_data(case[0], all_tables.subject_table, all_tables.subject_crossref_table),
+                authors=get_data(case[0], all_tables.authors_table, all_tables.authors_crossref_table),
+                special_terms=get_data(case[0], all_tables.special_terms_table, all_tables.special_terms_crossref_table),
+                cite_in_tags=get_data_with_comments(case[0], all_tables.cite_in_table, all_tables.cite_in_crossref_table)
+            )
+            cases_list.append(new_case)
+        return Casebook(sql_path, cases_list)
 
     def update_casebook_from_xl(self, xl_path):
         """ Updates the Casebook object with data given from a .xlsx file, at xl_path.
@@ -355,5 +427,3 @@ class Casebook:
         :return: self, the Casebook object is itself updated.
         """
         pass
-
-

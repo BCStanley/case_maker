@@ -21,7 +21,7 @@ class Table:
         """
         return string
 
-    def insert_query(self, entries: dict) -> str:
+    def insert_query(self, entries: dict) -> str | None:
         """
         A method of the Table(), which produces the SQL script for adding the information given.
         :param entries: the information in question, which must be entered as a dict {"name": name...} ect.
@@ -38,6 +38,43 @@ class Table:
             return string
         except KeyError as e:
             print(f"Failed to create query for {self.title}. Entry {e} missing.")
+            return None
+
+    def update_query(self, entries: dict, condition: tuple) -> str | None:
+        """
+        A method of Table(), which produces the SQL script for updating the data given.
+        :param entries: a dict object, in the form {column: row} for what the entries are to be changed to.
+        The method will check to ensure that the columns being changed are those of the table itself, and raise an
+        error if not.
+        :param condition: a tuple, e.g. ("id", 6) for identifying what entries to change. This means that only one
+        condition can be given, though this is fine for my purposes.
+        :return: a str, which is the sql text to be executed.
+        """
+
+        def entries_text(values: dict) -> list:
+            """
+            This function within the method is used for parsing the various alterations that are proposed.
+            It ensures that the relevant columns are those actually within the table, and makes the required syntax
+            changes for strings by adding quote marks.
+            :param values: this is the entries dict.
+            :return: a list object, of each of the alterations needed, e.g. "year = 1650"
+            """
+            s: list = []
+            for key, item in values.items():
+                assert key in self.fields.keys(), f"the field {key} is not in {self.title}"  # Test if column in table.
+                if type(item) == str:  # Add quotation marks if the entry is a string.
+                    item = f"\"{item}\""
+                else:
+                    pass
+                s.append(f"{key} = {item}")  # Produce the relevant line.
+            return s
+
+        string = f"""
+        UPDATE {self.title} 
+        SET {", ".join(entries_text(entries))}
+        WHERE {condition[0]} = {condition[1]};
+        """
+        return string
 
 
 class DatabaseStructure:
@@ -147,7 +184,14 @@ class SelectionQuery:
     @property
     def sql_text(self) -> str:
 
-        def condition_line(key: str, entry: list) -> str:
+        def condition_line(key: str, entry: list) -> str | None:
+            """
+            A function called within the sql_text property, for producing one line of SQL tex conditions based on the
+            type of search value (=, in, or between) and the values being compared.
+            :param key: a str, either "=", "in" or "between."
+            :param entry: a list of str objects, what is being looked for.
+            :return: a str, which is a line of SQL for producing the sql query.
+            """
             if "TEXT" in self.search_table.fields[key]:
                 value = f"\"{str(entry[1])}\""
             else:
@@ -159,6 +203,8 @@ class SelectionQuery:
             elif entry[0] == "between":
                 entries = value.split(", ")
                 return f"{key} {entry[0]} {entries[0]} AND {entries[1]}"
+            else:
+                return None
 
         if self.conditions:
             string = f"""SELECT {", ".join([item for item in self.selections])} from {self.search_table.title} where 
